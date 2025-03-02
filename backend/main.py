@@ -1,21 +1,12 @@
-import logging
 from fastapi import FastAPI, UploadFile, File, HTTPException
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-
-app = FastAPI()
-
-@app.get("/")
-def home():
-    logging.info("API Home oldal betöltve")
-    return {"message": "AI-Based Code Reviewer API is running!"}
+from backend.code_analyzer import analyze_code
 
 @app.post("/review/")
-async def review_code(file: UploadFile = File(...)):
+async def review_code(file: UploadFile = File(...), model_name: str = "StarCoder"):
     try:
         content = await file.read()
-        logging.info("Kód feltöltve és elemzésre küldve.")
-        analysis = analyze_code(content.decode("utf-8"))
+        logging.info(f"Kód feltöltve, AI elemzés indítása a {model_name} modellel.")
+        analysis = analyze_code(content.decode("utf-8"), model_name)
         logging.info("AI válasz generálva.")
         return {"analysis": analysis}
     except Exception as e:
