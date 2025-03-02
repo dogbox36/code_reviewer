@@ -1,0 +1,33 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository klónozása
+        uses: actions/checkout@v3
+
+      - name: Python telepítése
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Függőségek telepítése
+        run: pip install -r requirements.txt
+
+      - name: Statikus kódelemzés futtatása
+        run: |
+          pylint backend/
+          flake8 backend/
+
+      - name: Tesztek futtatása
+        run: pytest tests/
