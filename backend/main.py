@@ -1,21 +1,23 @@
-from fastapi import FastAPI, UploadFile, File
-from backend.code_analyzer import analyze_code
-from backend.github_integration import post_github_comment
+import logging
+from fastapi import FastAPI, UploadFile, File, HTTPException
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 app = FastAPI()
 
 @app.get("/")
 def home():
+    logging.info("API Home oldal betöltve")
     return {"message": "AI-Based Code Reviewer API is running!"}
 
 @app.post("/review/")
 async def review_code(file: UploadFile = File(...)):
-    content = await file.read()
-    analysis = analyze_code(content.decode("utf-8"))
-    return {"analysis": analysis}
-
-@app.post("/github-review/")
-async def review_github_pr(repo: str, pr_number: int):
-    analysis = analyze_code(f"Fetching PR {pr_number} from {repo}")
-    post_github_comment(repo, pr_number, analysis)
-    return {"message": f"Review posted to PR {pr_number}"}
+    try:
+        content = await file.read()
+        logging.info("Kód feltöltve és elemzésre küldve.")
+        analysis = analyze_code(content.decode("utf-8"))
+        logging.info("AI válasz generálva.")
+        return {"analysis": analysis}
+    except Exception as e:
+        logging.error(f"Hiba történt: {e}")
+        raise HTTPException(status_code=500, detail="Belső szerverhiba")
