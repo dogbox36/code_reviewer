@@ -1,0 +1,4 @@
+git mentés:
+git add .
+git commit -m "GITHUB_ACCESS_TOKEN"
+git push origin main
