@@ -7,6 +7,9 @@ uploaded_file = st.file_uploader("Tölts fel egy kódfájlt!", type=["py", "js",
 if uploaded_file is not None:
     content = uploaded_file.read().decode("utf-8")
     st.code(content, language="python")
+    st.sidebar.title("🧠 AI Modell kiválasztása")
+    model_name = st.sidebar.selectbox("Válassz AI modellt:", ["StarCoder", "CodeT5", "CodeBERT"])
+
 
     if st.button("Kód ellenőrzése AI-val"):
         response = requests.post("http://localhost:8000/review/", files={"file": uploaded_file})
