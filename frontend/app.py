@@ -1,25 +1,26 @@
 import streamlit as st
 import requests
 
-st.title(" AI-Based Code Reviewer")
+st.title("AI-Based Code Reviewer")
 
-# Kódfájl feltöltés
 uploaded_file = st.file_uploader("Tölts fel egy kódfájlt!", type=["py", "js", "java", "cpp"])
 if uploaded_file is not None:
     content = uploaded_file.read().decode("utf-8")
     st.code(content, language="python")
 
-    if st.button(" Kód ellenőrzése AI-val"):
+    if st.button("Kód ellenőrzése AI-val"):
         response = requests.post("http://localhost:8000/review/", files={"file": uploaded_file})
         analysis = response.json()["analysis"]
-        st.subheader(" AI Javaslatok:")
+        st.subheader("AI Javaslatok:")
         st.write(analysis)
 
-# GitHub PR kommentáló szekció
-st.sidebar.title(" GitHub PR Ellenőrző")
-repo = st.sidebar.text_input(" GitHub Repository (pl.: user/repo)")
-pr_number = st.sidebar.number_input(" PR Szám", min_value=1, step=1)
+    if st.button("Statikus elemzés futtatása"):
+        response = requests.post("http://localhost:8000/static-analysis/", files={"file": uploaded_file})
+        pylint_result = response.json()["pylint"]
+        flake8_result = response.json()["flake8"]
+        
+        st.subheader("Pylint eredmény:")
+        st.code(pylint_result, language="text")
 
-if st.sidebar.button(" PR elemzése és komment"):
-    response = requests.post(f"http://localhost:8000/github-review/?repo={repo}&pr_number={pr_number}")
-    st.sidebar.write(response.json()["message"])
+        st.subheader("Flake8 eredmény:")
+        st.code(flake8_result, language="text")
